@@ -7,47 +7,69 @@
 
 #include <stdio.h>
 #include "../ast/ast.h"
+#include "../ast/preprocess_ast.h"
 
-typedef struct Fun Fun;
-typedef struct Block Block;
-typedef struct BlockList BlockList;
-typedef struct GraphConfigBuilder GraphConfigBuilder;
-typedef struct GraphConfig GraphConfig;
+ASTNodes findAllProcedures();
+
+
+typedef struct CFG CFG;
+
+CFG *makeCFG(preparedFunc pf, int nextId, int num);
+
+void CFG_print(FILE *f, CFG *cfg, int num, CFG **pCfg, int i);
+
 typedef struct Link Link;
 typedef struct LinkList LinkList;
+typedef struct Block Block;
+typedef struct BlockList BlockList;
+typedef struct CFGBuilder CFGBuilder;
 
-struct Fun {
-    char *identifier;
-    ASTNode *body;
-};
+// Block
 
 struct Block {
     int id;
     __attribute__((unused)) char *call;
     LinkList *predecessors;
     LinkList *exits;
-    char *circleInfo;
 };
+
+Block *NewBlock(int id, char *call);
+
+// BlockList
 
 struct BlockList {
     Block **blocks;
     int count;
 };
 
-struct GraphConfigBuilder {
+BlockList *NewBlockList();
+
+
+// CFGBuilder
+
+struct CFGBuilder {
     BlockList *after_loop_block_stack;
     BlockList *curr_loop_guard_stack;
     Block *current_block;
+    __attribute__((unused)) BlockList *calls;
     int current_id;
-    GraphConfig *cfg;
+    CFG *cfg;
 };
 
-struct GraphConfig {
+void CFGBuilder_visit(CFGBuilder *cfgBuilder, ASTNode *node);
+
+// CFG
+
+struct CFG {
     char *procedureName;
     Block *entryblock;
-    BlockList *finalblocks;
+    __attribute__((unused)) BlockList *finalblocks;
     int nextId;
 };
+
+CFG *NewCFG(char *procedureName, Block *entryblock);
+
+// Link
 
 struct Link {
     Block *source;
@@ -55,31 +77,16 @@ struct Link {
     char *comment;
 };
 
+Link *NewLink(Block *source, Block *target, char *string);
+
+// LinkList
+
 struct LinkList {
     Link **links;
     int count;
 };
 
-ASTNodesFile findProcedures();
+LinkList *NewLinkList();
 
-Fun prepareFun(ASTNode *node);
-
-GraphConfig *initGraphConfig(Fun pf, int nextId, int num);
-
-void graphConfigPrint(FILE *f, GraphConfig *cfg, int num, GraphConfig **pCfg, int i);
-
-Block *createBlock(int id, char *call);
-
-BlockList *initBlockList();
-
-void graphConfigBuilderVisit(GraphConfigBuilder *cfgBuilder, ASTNode *node, int dowhile);
-void graphConfigBuilderVisitEnd(GraphConfigBuilder *cfgBuilder, ASTNode *node);
-void graphConfigBuilderVisitDoWhileEnd(GraphConfigBuilder *cfgBuilder, ASTNode *node);
-
-GraphConfig *createGraphConfig(char *procedureName, Block *entryblock);
-
-Link *createLink(Block *source, Block *target, char *string);
-
-LinkList *createLinkList();
 
 #endif //LAB_2_PAINTER_H

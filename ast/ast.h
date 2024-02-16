@@ -8,29 +8,33 @@
 #define funcSignature "funcSignature"
 #define sourceItem "sourceItem"
 
-#define maxNodes 1024
+#define maxCountOfNodesLists 1024
 
 typedef struct ASTNode ASTNode;
-typedef struct ASTNodesFile ASTNodesFile;
+typedef struct ASTNodes ASTNodes;
+
+struct ASTNodes {
+    ASTNode **nodes;
+    int count;
+};
 
 struct ASTNode {
     char *type;
     ASTNode *left;
     ASTNode *right;
     char *value;
-    char *valueNameCur;
     int id;
 };
 
-struct ASTNodesFile {
-    ASTNode **nodes;
-    int cntNodes;
-};
+void destroy();
 
 void printAST();
-void freeNodes();
 
 ASTNode *createNode(char *type, ASTNode *left, ASTNode *right, char *value);
-ASTNodesFile initNodesFile();
+
+ASTNodes createNodes();
+
+char *printNodeHuman(ASTNode *node);
+
 
 #endif //LAB_1_AST_H

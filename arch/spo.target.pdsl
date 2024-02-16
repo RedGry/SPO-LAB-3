@@ -1,0 +1,310 @@
+architecture spo {
+
+registers:
+	storage r0st [16];
+	storage r1st [16];
+	storage r2st [16];
+	storage r3st [16];
+	storage ip [16];
+	storage spst [16];
+	storage fpst [16];
+
+	storage inp [8];
+	storage outp [8];
+
+    view inReg = inp;
+    view outReg = outp;
+	view r0 = r0st;
+	view r1 = r1st;
+	view r2 = r2st;
+	view r3 = r3st;
+	view ipv = ip;
+	view sp = spst;
+	view fp = fpst;
+
+
+memory:
+
+	range constants_ram [0x0000 .. 0xffff] {
+		cell = 8;
+		endianess = little-endian;
+		granularity = 2;
+	}
+
+	range code_ram [0x0000 .. 0xffff] {
+		cell = 8;
+		endianess = little-endian;
+		granularity = 2;
+	}
+
+	range data_ram [0x0000 .. 0xffff] {
+		cell = 8;
+		endianess = little-endian;
+		granularity = 2;
+	}
+
+	range stack_ram [0x0000 .. 0xffff] {
+        cell = 8;
+        endianess = little-endian;
+        granularity = 2;
+    }
+
+instructions:
+
+	encode imm16 field = immediate [16];
+
+	encode reg field = register {
+		r0 = 0000,
+		r1 = 0001,
+		r2 = 0010,
+		r3 = 0011,
+		ipv = 0100,
+		sp = 0101,
+		fp = 0110,
+		inReg = 0111,
+		outReg = 1000
+	};
+
+	instruction add-reg2reg = { 0000 0000, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+		to = op1 + op2;
+		ip = ip + 4;
+	};
+
+	instruction add-imm2reg = { 0000 0001, reg as op1, imm16 as value, reg as to} {
+		to = op1 + value;
+		ip = ip + 4;
+	};
+	instruction sub-reg2reg = { 0000 0010, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+		to = op1 - op2;
+		ip = ip + 4;
+	};
+
+	instruction sub-imm2reg = { 0000 0011, reg as op1, imm16 as value, reg as to} {
+		to = op1 - value;
+		ip = ip + 4;
+	};
+
+	instruction asl = { 0000 0100, reg as op1, reg as to, 0000 0000 0000 0000 } {
+		to = op1 << 1;
+		ip = ip + 4;
+	};
+
+	instruction asr = { 0000 0101, reg as op1, reg as to, 0000 0000 0000 0000 } {
+		to = op1 << 1;
+		ip = ip + 4;
+	};
+    instruction mov-reg2reg = { 0000 0110, reg as op1, reg as to, 0000 0000 0000 0000 } {
+        to = op1;
+        ip = ip + 4;
+    };
+
+    instruction mov-imm2reg = { 0000 0111, imm16 as value, reg as to, 0000 } {
+        to = value;
+        ip = ip + 4;
+    };
+    instruction invert = { 0000 1000, reg as op1, reg as to, 0000 0000 0000 0000 } {
+        to = !op1;
+        ip = ip + 4;
+    };
+    instruction negative = { 0000 1001, reg as op1, reg as to, 0000 0000 0000 0000 } {
+        to = -op1;
+        ip = ip + 4;
+    };
+	instruction and-reg2reg = { 0000 1010, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+		to = op1 && op2;
+		ip = ip + 4;
+	};
+
+	instruction and-imm2reg = { 0000 1011, reg as op1, imm16 as value, reg as to} {
+		to = op1 & value;
+		ip = ip + 4;
+	};
+    instruction or-reg2reg = { 0000 1100, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+        to = op1 | op2;
+        ip = ip + 4;
+    };
+
+    instruction or-imm2reg = { 0000 1101, reg as op1, imm16 as value, reg as to} {
+        to = op1 | value;
+        ip = ip + 4;
+    };
+    instruction div-reg2reg = { 0000 1110, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+        to = op1 / op2;
+        ip = ip + 4;
+    };
+
+    instruction div-imm2reg = { 0000 1111, reg as op1, imm16 as value, reg as to} {
+        to = op1 / value;
+        ip = ip + 4;
+    };
+    instruction mul-reg2reg = { 0001 0000, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+        to = op1 * op2;
+        ip = ip + 4;
+    };
+
+    instruction mul-imm2reg = { 0001 0001, reg as op1, imm16 as value, reg as to} {
+        to = op1 * value;
+        ip = ip + 4;
+    };
+    instruction rem-reg2reg = { 0001 0010, reg as op1, reg as op2, reg as to, 0000 0000 0000} {
+        to = op1 % op2;
+        ip = ip + 4;
+    };
+
+    instruction rem-imm2reg = { 0001 0011, reg as op1, imm16 as value, reg as to} {
+        to = op1 % value;
+        ip = ip + 4;
+    };
+
+    instruction jump = { 0001 0100, imm16 as to, 0000 0000} {
+        ip = to;
+    };
+
+    instruction jumpeq = { 0001 0101, reg as op1, imm16 as to, 0000} {
+        if op1 == 0x0 then
+        {
+            ip = to;
+        }
+        else
+        {
+            ip = ip + 4;
+        }
+    };
+    instruction jumpgt = { 0001 0110, reg as op1, imm16 as to, 0000} {
+       if (op1 >> 15 == 0x0) && (op1 != 0x0) then
+       {
+           ip = to;
+       }
+       else
+       {
+           ip = ip + 4;
+       }
+    };
+    instruction jumpge = { 0001 0111, reg as op1, imm16 as to, 0000} {
+        if (op1 >> 15 == 0x0) then
+        {
+           ip = to;
+        }
+        else
+        {
+           ip = ip + 4;
+        }
+    };
+    instruction jumplt = { 0001 1000, reg as op1, imm16 as to, 0000} {
+        if op1 >> 15 == 0x1 then // op1 < 0
+            ip = to;
+        else
+            ip = ip + 4;
+    };
+    instruction jumple = { 0001 1001, reg as op1, imm16 as to, 0000} {
+       if (op1 >> 15 == 0x1) || (op1 == 0x0) then // op1 <= 0
+       {
+           ip = to;
+       }
+       else
+       {
+           ip = ip + 4;
+       }
+    };
+
+	encode bank sequence = alternatives {
+		d = {0000},
+		c = {0001},
+		t = {0011}
+	};
+
+	instruction st = { 0001 1010 0000, reg as from, imm16 as ptr } {
+		data_ram:1[ptr] = from;
+		data_ram:1[ptr+1] = from>>8;
+
+		ip = ip + 4;
+	};
+
+	instruction ld = { 0001 1011 0000, reg as to, imm16 as ptr } {
+		to = data_ram:1[ptr] + (data_ram:1[ptr+1] << 8);
+
+		ip = ip + 4;
+	};
+    instruction push = { 0001 1100, reg as from, 0000 0000 0000 0000 0000 } {
+        sp = sp - 2;
+        // data_ram:1[sp] = from;
+        // data_ram:1[sp+1] = from >> 8;
+        stack_ram:1[sp] = from;
+        stack_ram:1[sp+1] = from >> 8;
+		ip = ip + 4;
+    };
+    instruction pop = { 0001 1101, reg as to, 0000 0000 0000 0000 0000 } {
+        // to = data_ram:1[sp] + (data_ram:1[sp+1] << 8);
+        to = stack_ram:1[sp] + (stack_ram:1[sp+1] << 8);
+        sp = sp + 2;
+		ip = ip + 4;
+    };
+
+    instruction call = { 0001 1110, imm16 as ptr, 0000 0000 } {
+        sp = sp - 2;
+        data_ram:1[sp] = ip;
+        data_ram:1[sp+1] = ip >> 8;
+        sp = sp - 2;
+        data_ram:1[sp] = fp;
+        data_ram:1[sp+1] = fp >> 8;
+        fp = sp;
+        ip = ptr;
+    };
+    instruction ret = { 0001 1111 1111 1111 1111 1111 0000 0000 } {
+        if fp != 0 then {
+            sp = fp;
+            fp = data_ram:1[sp] + (data_ram:1[sp+1] << 8);
+            sp = sp + 2;
+            ip = data_ram:1[sp] + (data_ram:1[sp+1] << 8);
+            sp = sp + 2;
+        }
+
+        ip = ip + 4;
+    };
+	instruction hlt = { 1111 1111 1111 1111 1111 1111 1111 1111 } {
+	};
+
+mnemonics:
+
+	mnemonic hlt();
+    mnemonic ret();
+
+	format plain1 is "{1}";
+	format plain2 is "{1}, {2}";
+	format plain3 is "{1}, {2}, {3}";
+
+	mnemonic store for st(from, ptr) plain2;
+	mnemonic load for ld(ptr, to) plain2;
+
+    mnemonic call for call(ptr) plain1;
+
+    mnemonic neg for negative (op1, to) plain2;
+    mnemonic _not for invert (op1, to) plain2;
+
+	mnemonic add for add-reg2reg (op1, op2, to) plain3,
+				 for add-imm2reg (op1, value, to) plain3;
+
+	mnemonic sub for sub-reg2reg (op1, op2, to) plain3,
+				 for sub-imm2reg (op1, value, to) plain3;
+	mnemonic mov for mov-reg2reg (op1, to) plain2,
+				 for mov-imm2reg ( value, to) plain2;
+	mnemonic _and for and-reg2reg (op1, op2, to) plain3,
+				 for and-imm2reg (op1, value, to) plain3;
+	mnemonic _or for or-reg2reg (op1, op2, to) plain3,
+				 for or-imm2reg (op1, value, to) plain3;
+	mnemonic mul for mul-reg2reg (op1, op2, to) plain3,
+				 for mul-imm2reg (op1, value, to) plain3;
+	mnemonic div for div-reg2reg (op1, op2, to) plain3,
+				 for div-imm2reg (op1, value, to) plain3;
+	mnemonic rem for rem-reg2reg (op1, op2, to) plain3,
+				 for rem-imm2reg (op1, value, to) plain3;
+    mnemonic push for push(from) plain1;
+    mnemonic pop for pop(to) plain1;
+
+    mnemonic jump for jump(to) plain1;
+    mnemonic jumpeq for jumpeq(op1, to) plain2;
+    mnemonic jumpgt for jumpgt(op1, to) plain2;
+    mnemonic jumpge for jumpge(op1, to) plain2;
+    mnemonic jumplt for jumplt(op1, to) plain2;
+    mnemonic jumple for jumple(op1, to) plain2;
+}

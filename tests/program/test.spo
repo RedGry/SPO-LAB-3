@@ -1,0 +1,45 @@
+void print(int a){
+    write(a);
+}
+
+void printTestProgramAndAuthor() {
+    // "Test Program"
+    write(84); // T
+    write(101); // e
+    write(115); // s
+    write(116); // t
+    write(32); // Пробел
+    write(80); // P
+    write(114); // r
+    write(111); // o
+    write(103); // g
+    write(114); // r
+    write(97); // a
+    write(109); // m
+    write(10); // Перевод строки
+
+    // "Made by RedGry!"
+    write(77); // M
+    write(97); // a
+    write(100); // d
+    write(101); // e
+    write(32); // Пробел
+    write(98); // b
+    write(121); // y
+    write(32); // Пробел
+    write(82); // R
+    write(101); // e
+    write(100); // d
+    write(71); // G
+    write(114); // r
+    write(121); // y
+    write(33); // !
+    write(10); // Перевод строки
+}
+
+void main() {
+    int a = 10;
+    int operation = 30;
+    int res = 0;
+    printTestProgramAndAuthor();
+}

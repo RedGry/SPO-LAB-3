@@ -46,7 +46,7 @@ vm_worker: out.ptptb
 		inputFile tests/stdin.txt \
 		binaryFileToRun $(OUTPUT_DIR)/out.ptptb
 
-vm_worker_without_build:
+vm_worker_exec:
 	$(VM_COMMAND) -s ExecuteBinaryWithInput -w \
 		definitionFile arch/spo.target.pdsl \
 		archName spo \
@@ -92,7 +92,7 @@ build_lab3: ${BUILD_DIR}
 	gcc $(OBJS_WITH_PATH) -o $(LAB_NAME) && chmod +x lab3
 
 run_out:
-	./lab3 tests/program/calc.spo
+	./lab3 tests/program/calc2.spo
 	cat $(OUTPUT_DIR)/out.asm.data $(OUTPUT_DIR)/out.asm.code > $(OUTPUT_DIR)/out.asm
 
 run_calc:

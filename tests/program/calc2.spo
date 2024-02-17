@@ -1,0 +1,161 @@
+int read();
+void write(int r);
+
+void printZeroError(){
+    write(101);
+    write(114);
+    write(114);
+    write(111);
+    write(114);
+    write(10);
+}
+
+void printNumber(int num, bool n){
+    int nextLine = 10;
+    int revertedNum = 0;
+
+    if (num == 0) {
+        write(48);
+    } else {
+        while (num != 0) {
+            revertedNum = (revertedNum * 10) + (num % 10);
+            num = num / 10;
+        }
+        while (revertedNum != 0) {
+            write((revertedNum % 10) + 0x30);
+            revertedNum = revertedNum / 10;
+        }
+        if(n){
+            write(10);
+        }
+    }
+}
+
+void printR(int num, bool n, bool neg){
+    int nextLine = 10;
+    int revertedNum = 0;
+
+    write(61);
+
+    if (num == 0) {
+        write(48);
+    } else {
+        if (neg == true){
+            write(45);
+        }
+        while (num != 0) {
+            revertedNum = (revertedNum * 10) + (num % 10);
+            num = num / 10;
+        }
+        while (revertedNum != 0) {
+            write((revertedNum % 10) + 0x30);
+            revertedNum = revertedNum / 10;
+        }
+        if(n){
+            write(10);
+        }
+    }
+}
+
+void main() {
+    int number = 0;
+    int prev_oper = 0;
+    int operation = 0;
+    int state = 0;
+    int res = 0;
+    bool error = false;
+    bool neg = false;
+    bool start = true;
+    while(true){
+        int i = read();
+        if ((i >= 0x30) && (i <= 0x39)){
+            int num = i - 0x30;
+            if (start == true) {
+                res = res * 10 + num;
+            } else {
+                number = number * 10 + num;
+            }
+        } else if (i == 0x3d) {
+            state = 3;
+            if (start == true) {
+                printNumber(res, false);
+            } else {
+                printNumber(number, false);
+            }
+            if (operation == 1){
+                res = res + number;
+            } else if (operation == 2) {
+                  res = res - number;
+                             //}
+            } else if (operation == 3) {
+                             res = res * number;
+            } else if (operation == 4) {
+                if(number == 0){
+                    error = true;
+                    printZeroError();
+                } else {
+                    res = res / number;
+                }
+           }
+           if(error == false){
+              printR(res, true, neg);
+           }
+        } else if (state == 0 || state == 2){
+            if (start == true) {
+                printNumber(res, false);
+            } else {
+                printNumber(number, false);
+            }
+
+            prev_oper = operation;
+
+            if (i == 0x2b){ // +
+                state = 2;
+                operation = 1;
+                write(43);
+            } else if (i == 0x2d){ // -
+                state = 2;
+                operation = 2;
+                write(45);
+            } else if (i == 0x2a){ // *
+                state = 2;
+                operation = 3;
+                write(42);
+            } else if (i == 0x2f){ // /
+                state = 2;
+                operation = 4;
+                write(47);
+            }
+
+            if (state == 2 && start == false){
+                if (prev_oper == 1){
+                    res = res + number;
+                } else if (prev_oper == 2) {
+                     res = res - number;
+                } else if (prev_oper == 3) {
+                     res = res * number;
+                } else if (prev_oper == 4) {
+                     if(number == 0){
+                           error = true;
+                           printZeroError();
+                     } else {
+                           res = res / number;
+                     }
+                 }
+                 state = 0;
+                 //printR(res, true, neg);
+            }
+
+            if (start == true) {
+                            // res = res + number;
+                            start = false;
+            }
+
+            number = 0;
+        }
+
+        if (state == 3){
+            break;
+        }
+    }
+}
